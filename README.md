@@ -42,6 +42,25 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
 - **The footprint tool** comes in 1.1.0, once its eight copies are one.
 - **The event contracts** (the Staff Worklist's tab, Clinic Forms' fill) stay in their modules for now. Moving them means a class with two names during the change, which needs a plan of its own.
 
+## Using it in a module
+
+The module requires `anun333/openhealthcare-common: ^1.0`. Its bootstrap registers the copy in its own `vendor/` before asking whether the class exists. Composer remembers a class it once failed to find, so asking first would hide a copy registered afterwards.
+
+```php
+// In openemr.bootstrap.php, after registering the module's own namespace:
+$common = __DIR__ . '/vendor/anun333/openhealthcare-common/src';
+if (is_dir($common)) {
+    // A module copied in, with `composer install --no-dev` run in its folder. This leaves OpenEMR's own
+    // mapping alone when Composer installed the module there.
+    $classLoader->registerNamespaceIfNotExists('OpenHealthcare\\Common\\', $common);
+}
+if (!class_exists(\OpenHealthcare\Common\OpenEmr::class)) {
+    return; // the module stays switched off rather than stop OpenEMR's pages
+}
+```
+
+`dev/new_module.py` in the openhealthcare repository starts a module this way.
+
 ## Versions
 
 Every module installs into OpenEMR's one `vendor/` folder, so two modules needing different major versions of this package can't be installed together. So:
