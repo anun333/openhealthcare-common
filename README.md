@@ -61,6 +61,8 @@ if (!class_exists(\OpenHealthcare\Common\OpenEmr::class)) {
 
 `dev/new_module.py` in the openhealthcare repository starts a module this way.
 
+Keep permission checks literal in the module's own code, such as `AclMain::aclCheckCore('admin', 'super')` at the top of a page, so a reviewer reads them where the page is. `isAdministrator()` is here for code with no page of its own. A module's `tools/footprint.php` reads the methods of this package that the module calls, as part of the module, and lists their SQL and calls under `vendor/anun333/openhealthcare-common/`.
+
 ## Versions
 
 Every module installs into OpenEMR's one `vendor/` folder, so two modules needing different major versions of this package can't be installed together. So:
