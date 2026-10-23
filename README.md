@@ -63,6 +63,24 @@ if (!class_exists(\OpenHealthcare\Common\OpenEmr::class)) {
 
 Keep permission checks literal in the module's own code, such as `AclMain::aclCheckCore('admin', 'super')` at the top of a page, so a reviewer reads them where the page is. `isAdministrator()` is here for code with no page of its own. A module's `tools/footprint.php` reads the methods of this package that the module calls, as part of the module, and lists their SQL and calls under `vendor/anun333/openhealthcare-common/`.
 
+## Modules that use it
+
+Each installs with `composer require anun333/<module>` from the OpenEMR directory.
+
+| Module | What it does | Uses this package |
+|---|---|---|
+| [Clinic Forms](https://github.com/anun333/oe-module-clinic-forms) | Printable clinic paperwork, filled with the clinic's details, and the same documents as OpenEMR questionnaires | at run time |
+| [Layout Export](https://github.com/anun333/oe-module-layout-export) | Layout forms and lists exported to files, compared with a site or another file | at run time |
+| [Units Check](https://github.com/anun333/oe-module-units-check) | A site's units in UCUM terms, and UCUM codes added to its unit lists | at run time |
+| [Behavioral Health](https://github.com/anun333/oe-module-behavioral-health) | 42 CFR Part 2 consents and disclosures, in OpenEMR's own Disclosures record | at run time |
+| [UDS Report](https://github.com/anun333/oe-module-uds-report) | HRSA's Uniform Data System tables, with the record problems to fix first | in its tests |
+| [Staff Worklist](https://github.com/anun333/oe-module-staff-worklist) | One queue of outstanding staff work across patients | in its tests |
+| [Sliding Fee Discount](https://github.com/anun333/oe-module-sliding-fee) | A sliding fee program to HRSA's and Title X's rules | in its tests |
+| [Care Management](https://github.com/anun333/oe-module-care-management) | Care management enrollment, time and the codes each month meets | in its tests |
+| [Migration](https://github.com/anun333/oe-module-migration) | Records from another EHR, from the FHIR export certified EHRs offer | in its tests |
+
+"In its tests" means the translated-strings scan only; the module's own compatibility code still runs.
+
 ## Versions
 
 Every module installs into OpenEMR's one `vendor/` folder, so two modules needing different major versions of this package can't be installed together. So:
