@@ -92,7 +92,7 @@ Every module installs into OpenEMR's one `vendor/` folder, so two modules needin
 
 Modules require it in their `composer.json`, and `composer require anun333/oe-module-…` from the OpenEMR directory brings it along. A module copied into `custom_modules` without Composer needs this package too. Each module's README says how, once it uses the package.
 
-PHP 8.2 or later; OpenEMR's own classes come from the OpenEMR it runs in.
+PHP 8.2 or later; OpenEMR's own classes come from the OpenEMR it runs in. Whatever the version, run a PHP with the fix for php2shell (2026-10-21: 8.2.35, 8.3.36, 8.4.27, 8.5.12 or later); the modules' READMEs say why the official OpenEMR 7.0.x images can't get it.
 
 ## Development
 
