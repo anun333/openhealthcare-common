@@ -1,0 +1,13 @@
+{
+    "name": "example/oe-module-sample",
+    "description": "A module for the footprint tool's test.",
+    "type": "openemr-module",
+    "extra": {
+        "openhealthcare": {
+            "footprint-not-covered": [
+                "Sample note one.",
+                "Sample note two."
+            ]
+        }
+    }
+}

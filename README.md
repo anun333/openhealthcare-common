@@ -18,6 +18,8 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
   | `audit()` | `EventAuditLogger::getInstance()` | `::instance()` |
   | `isAdministrator()` | `AclMain::aclCheckCore('admin', 'super')` | the same |
 
+- **The footprint tool** (`tools/footprint.php`, `vendor/bin/footprint`): writes each module's FOOTPRINT.md from its source. See [The footprint tool](#the-footprint-tool).
+
 - **`OpenHealthcare\Common\TranslatedStrings::scan($moduleDir)`:** every string a module passes to `xl()`, `xlt()`, `xla()`, `xlj()` or `xlx()` that has an apostrophe or quote mark, which OpenEMR shows as a backtick. A module's test:
 
   ```php
@@ -39,7 +41,6 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
   ```
 
 - **A module bootstrap's version guard.** `openemr.bootstrap.php` runs on every request, the login page included, before a module's dependencies are known to be there. A bootstrap that needs `OEGlobalsBag` returns early without it, so on OpenEMR 7.0.3 and older the module stays switched off instead of stopping every page.
-- **The footprint tool** comes in 1.1.0, once its eight copies are one.
 - **The event contracts** (the Staff Worklist's tab, Clinic Forms' fill) stay in their modules for now. Moving them means a class with two names during the change, which needs a plan of its own.
 
 ## Using it in a module
@@ -62,6 +63,27 @@ if (!class_exists(\OpenHealthcare\Common\OpenEmr::class)) {
 `dev/new_module.py` in the openhealthcare repository starts a module this way.
 
 Keep permission checks literal in the module's own code, such as `AclMain::aclCheckCore('admin', 'super')` at the top of a page, so a reviewer reads them where the page is. `isAdministrator()` is here for code with no page of its own. A module's `tools/footprint.php` reads the methods of this package that the module calls, as part of the module, and lists their SQL and calls under `vendor/anun333/openhealthcare-common/`.
+
+## The footprint tool
+
+Each module's FOOTPRINT.md says what installing it changes in the database, what it reads and writes, what it hooks into, which permission checks and audit events it has, and which settings and files it touches. It's generated from the source, so it can't drift from the code. In a module:
+
+```
+php tools/footprint.php            # write FOOTPRINT.md
+php tools/footprint.php --check    # exit 1 if it's stale (CI runs this)
+```
+
+The module's `tools/footprint.php` only loads `vendor/anun333/openhealthcare-common/tools/footprint.php`; `vendor/bin/footprint [--root=<module>] [--check]` runs the same tool. What the sheet can't show for a module (whether its permission checks behave for a restricted user, whether its rules are right) is written by the module in its composer.json:
+
+```json
+"extra": {
+    "openhealthcare": {
+        "footprint-not-covered": ["Whether ...", "Whether ..."]
+    }
+}
+```
+
+A change to the tool's output changes every module's sheet, so a release that changes it regenerates them all in the same pass.
 
 ## Modules that use it
 

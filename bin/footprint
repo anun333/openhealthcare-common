@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * vendor/bin/footprint: openhealthcare-common's footprint tool (tools/footprint.php), from anywhere.
+ *
+ * @package   OpenHealthcare\Common
+ * @link      https://github.com/anun333/openhealthcare-common
+ * @license   https://www.gnu.org/licenses/gpl-3.0.html GNU General Public License 3
+ */
+
+declare(strict_types=1);
+
+require dirname(__DIR__) . '/tools/footprint.php';
