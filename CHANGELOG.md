@@ -2,7 +2,7 @@
 
 ## 1.2.0 (2026-10-25)
 
-- **The footprint sheet lists the programs a module runs** (a new section, "Programs it runs"): each file that calls `proc_open()`, `exec()`, `shell_exec()`, `system()`, `passthru()`, `popen()` or `pcntl_exec()`, as files it writes are listed. A method of the module's own with one of those names, or `curl_exec()`, isn't one, and the detector tests itself on both before it runs. Clinic Forms 0.38.0 is the first module that runs one (LibreOffice, to make PDFs tagged for PDF/UA). Each module's sheet gains the section when it next updates this package and writes its sheet again.
+- **The footprint sheet lists the programs a module runs** (a new section, "Programs it runs"): each file that calls `proc_open()`, `exec()`, `shell_exec()`, `system()`, `passthru()`, `popen()` or `pcntl_exec()`, as files it writes are listed. A method of the module's own with one of those names, or `curl_exec()`, isn't one, and the detector tests itself on both before it runs. Clinic Forms 0.38.0 is the first module that runs one (LibreOffice, to make PDFs tagged for PDF/UA). A module whose CI installs the newest 1.x (no committed lock file, as ours) must write its sheet again with 1.2.0, or its `footprint --check` fails: corrected 2026-10-25, after Revenue Cycle's and Title X's release CI failed on it. Every module's sheet was written again the same day.
 
 ## 1.1.0 (2026-10-23)
 
