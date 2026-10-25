@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 (2026-10-25)
+
+- **The footprint sheet lists the programs a module runs** (a new section, "Programs it runs"): each file that calls `proc_open()`, `exec()`, `shell_exec()`, `system()`, `passthru()`, `popen()` or `pcntl_exec()`, as files it writes are listed. A method of the module's own with one of those names, or `curl_exec()`, isn't one, and the detector tests itself on both before it runs. Clinic Forms 0.38.0 is the first module that runs one (LibreOffice, to make PDFs tagged for PDF/UA). Each module's sheet gains the section when it next updates this package and writes its sheet again.
+
 ## 1.1.0 (2026-10-23)
 
 - **The footprint tool** (`tools/footprint.php`, or `vendor/bin/footprint`): one tool writes every module's FOOTPRINT.md, in place of a copy in each module. The copies had drifted: UDS's had no permission checks or OpenEMR functions sections, and five modules carried another module's closing notes, claiming checks that weren't theirs. A module's own `tools/footprint.php` now just loads this one.

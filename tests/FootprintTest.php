@@ -48,6 +48,7 @@ final class FootprintTest extends TestCase
             '| `patients / med (write or addonly)` | `public/index.php` |',
             "- `patient-record-select`, through OpenEMR's `EventAuditLogger`, from `public/index.php`.",
             '- `public/index.php`: `file_put_contents()`',
+            "## Programs it runs\n\n- `src/Bootstrap.php`: `proc_open()`\n",
             'Menu entry "Sample", shown to users with `patients / med`.',
             "## Not covered here\n\n- Sample note one.\n- Sample note two.\n",
         ] as $line) {

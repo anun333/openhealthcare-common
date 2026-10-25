@@ -592,6 +592,25 @@ foreach (phpFiles($root) as $file) {
 }
 ksort($fileWrites);
 
+// --- programs it runs ---------------------------------------------------------
+// Calls that start another program on the server, as written in the source. The sheet says where they
+// are; the README says which program, and why.
+$runPattern = '/(?<![\w>:$])(?<!function )(proc_open|exec|shell_exec|system|passthru|popen|pcntl_exec)\s*\(/';
+if (!preg_match($runPattern, 'proc_open($command') || !preg_match($runPattern, 'shell_exec(\'x\')')
+    || !preg_match($runPattern, '\\exec($c)') || preg_match($runPattern, '$this->exec(') || preg_match($runPattern, 'curl_exec($h)')
+    || preg_match($runPattern, 'Process::exec(') || preg_match($runPattern, 'private function exec(string $f)')) {
+    fail('program detector self-test failed');
+}
+$runs = [];
+foreach (phpFiles($root) as $file) {
+    // the code alone: a comment that names one of these calls runs nothing
+    $code = implode('', array_map(fn($t) => is_array($t) ? (in_array($t[0], [T_COMMENT, T_DOC_COMMENT], true) ? '' : $t[1]) : $t, token_get_all((string) file_get_contents($file))));
+    if (preg_match_all($runPattern, $code, $m)) {
+        $runs[substr($file, strlen($root) + 1)] = array_values(array_unique($m[1]));
+    }
+}
+ksort($runs);
+
 // --- composition ------------------------------------------------------------
 $kinds = [];
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
@@ -748,6 +767,12 @@ $md[] = '';
 $md[] = $fileWrites === []
     ? '- None.'
     : implode("\n", array_map(fn($f, $c) => "- `$f`: " . implode(', ', array_map(fn($x) => "`$x()`", $c)), array_keys($fileWrites), $fileWrites));
+$md[] = '';
+$md[] = '## Programs it runs';
+$md[] = '';
+$md[] = $runs === []
+    ? '- None: no `proc_open()`, `exec()`, `shell_exec()`, `system()`, `passthru()` or `popen()` in the module\'s PHP.'
+    : implode("\n", array_map(fn($f, $c) => "- `$f`: " . implode(', ', array_map(fn($x) => "`$x()`", $c)), array_keys($runs), $runs));
 $md[] = '';
 $md[] = '## Outbound network';
 $md[] = '';
