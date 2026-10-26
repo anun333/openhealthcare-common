@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2 (2026-10-25)
+
+- **Fixed: on OpenEMR 8.0.0 to 8.0.0.3, every page that read the session or a CSRF token through `OpenEmr` stopped.** 8.0.x's `SessionWrapperFactory` has only `getWrapper()`; `getActiveSession()` came with 8.1.0. `OpenEmr::session()` now reads 8.0.x's wrapper, and the CSRF calls pass `CsrfUtils` a session only when it is a Symfony session, as 8.1.0's is; given none, 8.0.x's `CsrfUtils` reads `$_SESSION` itself. 1.3.1 had fixed the bag's getters on the same releases; this was the second gap the fresh 8.0.0 install showed, once the login worked.
+
 ## 1.3.1 (2026-10-25)
 
 - **Fixed: on OpenEMR 7.0.4 and 8.0.0 to 8.0.0.3, a module using `OpenEmr` stopped every page, the login page included.** Those releases have `OEGlobalsBag` without `getWebRoot()`, `getProjectDir()`, `getSrcDir()` or `getKernel()`, which came with 8.1.0, and `OpenEmr` called them wherever the class existed. Each is now used only when the running OpenEMR has it; otherwise the value OpenEMR stores under its name (`webroot`, `fileroot`, `srcdir`, `kernel`) is read, from the bag on 7.0.4 to 8.0.x and from `$GLOBALS` before. Found on a fresh install of the official 8.0.0 image with every module enabled (the login answered HTTP 500). The tests now run OpenEmr against both shapes of the bag; the two new ones fail on 1.3.0.

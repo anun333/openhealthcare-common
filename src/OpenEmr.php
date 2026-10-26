@@ -9,7 +9,8 @@
  *   web root, project and    OEGlobalsBag's getters (8.1+)        or the value OpenEMR set under its
  *   library folders, kernel                                      name (in the bag on 7.0.4 to 8.0.x,
  *                                                                in $GLOBALS before)
- *   the session             SessionWrapperFactory (8.0+)        or $_SESSION
+ *   the session             SessionWrapperFactory's active session (8.1+), its wrapper (8.0.x),
+ *                           or $_SESSION
  *   CSRF tokens             CsrfUtils with a session argument    or without one (7.0)
  *   access denied           AccessDeniedHelper (8.1+)            or a plain 403 page
  *   the audit log           EventAuditLogger::getInstance()      or ::instance() (7.0's Singleton trait)
@@ -152,7 +153,7 @@ final class OpenEmr
 
     public static function csrfToken(): string
     {
-        $session = self::sessionObject();
+        $session = self::csrfSession();
         return $session !== null && self::takesSession('collectCsrfToken')
             ? (string)CsrfUtils::collectCsrfToken(session: $session)
             : (string)CsrfUtils::collectCsrfToken();
@@ -162,7 +163,7 @@ final class OpenEmr
     public static function requireCsrf(mixed $token): void
     {
         $token = is_string($token) ? $token : '';
-        $session = self::sessionObject();
+        $session = self::csrfSession();
         $valid = $session !== null && self::takesSession('verifyCsrfToken')
             ? CsrfUtils::verifyCsrfToken($token, session: $session)
             : CsrfUtils::verifyCsrfToken($token);
@@ -209,12 +210,30 @@ final class OpenEmr
         $logger->newEvent($event, (string)self::session('authUser'), (string)self::session('authProvider'), 1, $comment, $pid);
     }
 
+    /**
+     * The session, for its get(): 8.1.0's active session, 8.0.x's session wrapper (the factory had only
+     * getWrapper() then), or null before 8.0, which keeps it in $_SESSION.
+     */
     private static function sessionObject(): ?object
     {
         if (!class_exists(self::SESSION_FACTORY)) {
             return null;
         }
-        return self::SESSION_FACTORY::getInstance()->getActiveSession();
+        $factory = self::SESSION_FACTORY::getInstance();
+        if (method_exists($factory, 'getActiveSession')) {
+            return $factory->getActiveSession();
+        }
+        return method_exists($factory, 'getWrapper') ? $factory->getWrapper() : null;
+    }
+
+    /**
+     * The session CsrfUtils takes: a Symfony session. 8.0.x's wrapper isn't one, and there CsrfUtils
+     * reads $_SESSION itself when given none.
+     */
+    private static function csrfSession(): ?object
+    {
+        $session = self::sessionObject();
+        return $session instanceof \Symfony\Component\HttpFoundation\Session\SessionInterface ? $session : null;
     }
 
     private static function takesSession(string $method): bool
