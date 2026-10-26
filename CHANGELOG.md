@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1 (2026-10-25)
+
+- **Fixed: on OpenEMR 7.0.4 and 8.0.0 to 8.0.0.3, a module using `OpenEmr` stopped every page, the login page included.** Those releases have `OEGlobalsBag` without `getWebRoot()`, `getProjectDir()`, `getSrcDir()` or `getKernel()`, which came with 8.1.0, and `OpenEmr` called them wherever the class existed. Each is now used only when the running OpenEMR has it; otherwise the value OpenEMR stores under its name (`webroot`, `fileroot`, `srcdir`, `kernel`) is read, from the bag on 7.0.4 to 8.0.x and from `$GLOBALS` before. Found on a fresh install of the official 8.0.0 image with every module enabled (the login answered HTTP 500). The tests now run OpenEmr against both shapes of the bag; the two new ones fail on 1.3.0.
+- **`OpenEmr::srcDir()`** (OpenEMR's library folder, for the legacy includes) and **`OpenEmr::kernel()`** (null outside a request, and on 8.1.0 and later without asking `getKernel()`, which throws when there is none), so a module needn't call the bag's getters itself.
+- `OpenEmr::setting()` reads the bag's `get()`, which every release with the bag has, rather than `getString()`.
+
 ## 1.3.0 (2026-10-25)
 
 - **`GuideLabels::check()`:** every label a module's GUIDE.md quotes in bold is a string the module translates; a label from data is named with its file in composer.json (`extra.openhealthcare.guide-labels-elsewhere`), and that file must still contain it. Run on the two guides written so far: the Worklist's 51 labels all match; UDS's three demographics field titles come from its install SQL and are named there.

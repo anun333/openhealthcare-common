@@ -5,14 +5,19 @@
  * on 7.0.x as well as 8.x. Each uses the newer interface when the running OpenEMR has it and the
  * 7.0 way otherwise:
  *
- *   settings and web root   OEGlobalsBag (7.0.4, 8.0+)          or $GLOBALS
+ *   settings                OEGlobalsBag (7.0.4, 8.0+)          or $GLOBALS
+ *   web root, project and    OEGlobalsBag's getters (8.1+)        or the value OpenEMR set under its
+ *   library folders, kernel                                      name (in the bag on 7.0.4 to 8.0.x,
+ *                                                                in $GLOBALS before)
  *   the session             SessionWrapperFactory (8.0+)        or $_SESSION
  *   CSRF tokens             CsrfUtils with a session argument    or without one (7.0)
  *   access denied           AccessDeniedHelper (8.1+)            or a plain 403 page
  *   the audit log           EventAuditLogger::getInstance()      or ::instance() (7.0's Singleton trait)
  *
  * Measured against the v7_0_3 and v8_0_0 tags and the official 7.0.2, 7.0.3 and 8.x images
- * (2026-10-16 and 2026-10-22). It replaces the copies in Clinic Forms, Layout Export and Units Check,
+ * (2026-10-16 and 2026-10-22). Corrected 2026-10-25 (1.3.1): 7.0.4 and 8.0.0 to 8.0.0.3 have the
+ * bag but not getWebRoot(), getProjectDir(), getSrcDir() or getKernel(), which came with 8.1.0, so
+ * 1.0.0 to 1.3.0 stopped every page there; the official 8.0.0 image showed it. It replaces the copies in Clinic Forms, Layout Export and Units Check,
  * which were the same in every method but the module named in the 403 page's log line.
  *
  * OpenEMR's classes are the host's: nothing here requires them through Composer, and each is
@@ -44,11 +49,21 @@ final class OpenEmr
     /** A string setting, such as OE_SITE_DIR. */
     public static function setting(string $name): string
     {
-        if (class_exists(self::GLOBALS_BAG)) {
-            return (string)self::GLOBALS_BAG::getInstance()->getString($name);
-        }
-        $value = $GLOBALS[$name] ?? '';
+        $value = class_exists(self::GLOBALS_BAG) ? self::GLOBALS_BAG::getInstance()->get($name) : ($GLOBALS[$name] ?? '');
         return is_scalar($value) ? (string)$value : '';
+    }
+
+    /**
+     * What OEGlobalsBag's getter returns when the running OpenEMR has it (8.1.0 and later), else the
+     * value OpenEMR set under its name: in the bag on 7.0.4 to 8.0.x, in $GLOBALS before.
+     */
+    private static function fromBag(string $getter, string $name): mixed
+    {
+        if (!class_exists(self::GLOBALS_BAG)) {
+            return $GLOBALS[$name] ?? null;
+        }
+        $bag = self::GLOBALS_BAG::getInstance();
+        return method_exists($bag, $getter) ? $bag->$getter() : $bag->get($name);
     }
 
     public static function siteDir(): string
@@ -58,12 +73,35 @@ final class OpenEmr
 
     public static function webRoot(): string
     {
-        return class_exists(self::GLOBALS_BAG) ? (string)self::GLOBALS_BAG::getInstance()->getWebRoot() : self::setting('webroot');
+        $value = self::fromBag('getWebRoot', 'webroot');
+        return is_string($value) ? $value : '';
     }
 
     public static function projectDir(): string
     {
-        return class_exists(self::GLOBALS_BAG) ? (string)self::GLOBALS_BAG::getInstance()->getProjectDir() : self::setting('fileroot');
+        $value = self::fromBag('getProjectDir', 'fileroot');
+        return is_string($value) ? $value : '';
+    }
+
+    /** OpenEMR's library folder, for the legacy includes (options.inc.php, forms.inc.php). */
+    public static function srcDir(): string
+    {
+        $value = self::fromBag('getSrcDir', 'srcdir');
+        return is_string($value) ? $value : '';
+    }
+
+    /** OpenEMR's kernel, or null outside a request (a command-line tool, the tests). */
+    public static function kernel(): ?object
+    {
+        if (class_exists(self::GLOBALS_BAG)) {
+            $bag = self::GLOBALS_BAG::getInstance();
+            // 8.1.0's getKernel() throws without one; ask first.
+            if (method_exists($bag, 'hasKernel') && !$bag->hasKernel()) {
+                return null;
+            }
+        }
+        $kernel = self::fromBag('getKernel', 'kernel');
+        return is_object($kernel) ? $kernel : null;
     }
 
     /** OpenEMR's release, such as 8.4.1: the setting where it is set, else the database's version row. */
@@ -80,8 +118,8 @@ final class OpenEmr
     /** The event dispatcher, for subscribing to OpenEMR's events (the menu, other modules'). */
     public static function eventDispatcher(): EventDispatcherInterface
     {
-        $kernel = class_exists(self::GLOBALS_BAG) ? self::GLOBALS_BAG::getInstance()->getKernel() : ($GLOBALS['kernel'] ?? null);
-        $dispatcher = is_object($kernel) && method_exists($kernel, 'getEventDispatcher') ? $kernel->getEventDispatcher() : null;
+        $kernel = self::kernel();
+        $dispatcher = $kernel !== null && method_exists($kernel, 'getEventDispatcher') ? $kernel->getEventDispatcher() : null;
         if (!$dispatcher instanceof EventDispatcherInterface) {
             throw new \RuntimeException('OpenEMR kernel not available');
         }
