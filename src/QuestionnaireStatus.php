@@ -6,8 +6,8 @@
  * pages save a submitted response as completed (amended when it is edited after), and only a draft,
  * which today only an API client writes, stays in-progress.
  *
- * The rule, per site:
- * - until its first completed or amended response, every response counts: it is on the old runtime;
+ * The rule, per site, once its runtime is 0.4.0 or later (QuestionnaireRuntime::COMPLETES):
+ * - until its first completed or amended response, every response counts;
  * - after that, a response saved before that moment counts whatever its status, and one saved later
  *   counts only when it is completed or amended;
  * - entered-in-error never counts.
@@ -15,6 +15,11 @@
  * The moment is the earliest last_updated (create_time when the row was never updated) among
  * completed and amended rows, so an old response edited under the new runtime doesn't move it back.
  * No setting is needed and no upgrade date is guessed.
+ *
+ * On an older runtime the status says nothing (it saves every response in-progress), so every
+ * response but entered-in-error counts, whatever other rows hold: a FHIR API client, the SMART
+ * questionnaire app say, can write a completed response on 8.4.1, and that mustn't stop the old
+ * runtime's responses counting (1.3.3; 1.3.0 to 1.3.2 applied the rule on every runtime).
  *
  * @package   OpenHealthcare\Common
  * @link      https://github.com/anun333/openhealthcare-common
@@ -52,7 +57,13 @@ final class QuestionnaireStatus
      */
     public static function condition(string $alias = 'questionnaire_response'): array
     {
-        return self::conditionSince($alias, self::since());
+        return self::conditionSince($alias, self::applies() ? self::since() : null);
+    }
+
+    /** Whether the site's runtime records finished responses (0.4.0 and later), so the rule applies. */
+    public static function applies(?string $projectDir = null): bool
+    {
+        return QuestionnaireRuntime::atLeast(QuestionnaireRuntime::COMPLETES, $projectDir);
     }
 
     /**
@@ -72,7 +83,10 @@ final class QuestionnaireStatus
         return ["($status IN ('completed', 'amended') OR ($status <> 'entered-in-error' AND `$alias`.`create_time` < ?))", [$since]];
     }
 
-    /** The same rule for a row already read: its status and create_time, and the moment from since(). */
+    /**
+     * The same rule for a row already read: its status and create_time, and the moment, which is
+     * since() when applies() and null otherwise.
+     */
     public static function counts(?string $status, ?string $createTime, ?string $since): bool
     {
         if ($status === 'entered-in-error') {

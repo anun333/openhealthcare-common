@@ -16,6 +16,16 @@ final class QuestionnaireStatusTest extends TestCase
     protected function tearDown(): void
     {
         QueryUtils::$rows = [];
+        unset($GLOBALS['fileroot']);
+    }
+
+    /** A project directory whose runtime file has this source. */
+    private static function project(string $source): string
+    {
+        $dir = sys_get_temp_dir() . '/ohc-status-' . bin2hex(random_bytes(6));
+        mkdir(dirname("$dir/" . \OpenHealthcare\Common\QuestionnaireRuntime::PATH), 0777, true);
+        file_put_contents("$dir/" . \OpenHealthcare\Common\QuestionnaireRuntime::PATH, $source);
+        return $dir;
     }
 
     public function testTheMomentIsTheFirstCompletedSaveByItsLastUpdate(): void
@@ -68,8 +78,18 @@ final class QuestionnaireStatusTest extends TestCase
         );
         $this->assertSame([self::SINCE], $binds);
 
+        // condition() asks since() itself, but only where the runtime records finished responses.
+        $GLOBALS['fileroot'] = self::project("    version: '0.4.0',\n");
         QueryUtils::$rows = [['since' => self::SINCE]];
-        $this->assertSame([self::SINCE], QuestionnaireStatus::condition('qr')[1], 'condition() asks since() itself');
+        $this->assertSame([self::SINCE], QuestionnaireStatus::condition('qr')[1], 'runtime 0.4.0: the rule applies');
+
+        $GLOBALS['fileroot'] = self::project("    version: '0.2.0',\n");
+        QueryUtils::$lastSql = '';
+        [$sql, $binds] = QuestionnaireStatus::condition('qr');
+        $this->assertSame([], $binds, 'runtime 0.2.0: every status but entered-in-error, whatever the rows say');
+        $this->assertSame("COALESCE(`qr`.`status`, '') <> 'entered-in-error'", $sql);
+        $this->assertSame('', QueryUtils::$lastSql, 'and since() is not asked');
+        unset($GLOBALS['fileroot']);
     }
 
     public function testAnAliasMustBeAName(): void

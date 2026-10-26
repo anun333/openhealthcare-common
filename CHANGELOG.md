@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.3 (2026-10-25)
+
+- **Fixed: on a site whose questionnaire runtime is older than 0.4.0, one completed response stopped every later response counting.** `QuestionnaireStatus` (1.3.0) took the site's first completed or amended response as the moment its runtime started recording finished ones. But an older runtime saves every response in-progress, finished or not, and a FHIR API client (the SMART questionnaire app, say) can write a completed one on 8.4.1: from then on, the runtime's own finished responses dropped out. The rule now applies only where the site's runtime is 0.4.0 or later (`QuestionnaireStatus::applies()`); elsewhere every response but entered-in-error counts, as before 1.3.0. Found by the Staff Worklist's end-to-end check on 8.4.1, whose one response saved through core as completed hid its other test responses.
+
 ## 1.3.2 (2026-10-25)
 
 - **Fixed: on OpenEMR 8.0.0 to 8.0.0.3, every page that read the session or a CSRF token through `OpenEmr` stopped.** 8.0.x's `SessionWrapperFactory` has only `getWrapper()`; `getActiveSession()` came with 8.1.0. `OpenEmr::session()` now reads 8.0.x's wrapper, and the CSRF calls pass `CsrfUtils` a session only when it is a Symfony session, as 8.1.0's is; given none, 8.0.x's `CsrfUtils` reads `$_SESSION` itself. 1.3.1 had fixed the bag's getters on the same releases; this was the second gap the fresh 8.0.0 install showed, once the login worked.
