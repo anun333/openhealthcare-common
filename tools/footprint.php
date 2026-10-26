@@ -328,6 +328,26 @@ $statements = array_values(array_filter(array_map('trim', preg_split('/;\s*$/m',
 if ($hasInstall && $statements === []) {
     fail('no statements parsed from sql/install.sql');
 }
+/**
+ * The openhealthcare module that owns a table, by its prefix, or null: a table another of our
+ * modules created isn't OpenEMR's, and its sheet says whose it is. No core table uses these
+ * prefixes (checked against master's database.sql, 2026-10-25).
+ */
+function otherModule(string $table): ?string
+{
+    $prefixes = [
+        'behavioral_health_' => 'Behavioral Health', 'care_mgmt_' => 'Care Management', 'ccbhc_' => 'CCBHC Report',
+        'migration_' => 'Migration', 'revenue_cycle_' => 'Revenue Cycle', 'sliding_fee_' => 'Sliding Fee',
+        'staff_worklist_' => 'Staff Worklist', 'title_x_report_' => 'Title X Report', 'uds_' => 'UDS Report',
+    ];
+    foreach ($prefixes as $prefix => $module) {
+        if (str_starts_with($table, $prefix)) {
+            return "the $module module (another openhealthcare module)";
+        }
+    }
+    return null;
+}
+
 $ownTables = [];
 $alters = [];
 $inserts = [];
@@ -440,7 +460,8 @@ if ($queries === 0) {
 }
 ksort($reads);
 ksort($writes);
-$coreWrites = array_diff(array_keys($writes), $ownTables);
+$coreWrites = array_values(array_filter(array_diff(array_keys($writes), $ownTables), fn(string $t): bool => otherModule($t) === null));
+$moduleWrites = array_values(array_filter(array_diff(array_keys($writes), $ownTables), fn(string $t): bool => otherModule($t) !== null));
 
 // --- hooks ------------------------------------------------------------------
 $bootstrap = (string) file_get_contents($root . '/src/Bootstrap.php');
@@ -704,7 +725,7 @@ $md[] = '|---|---|---|---|';
 foreach (array_unique(array_merge(array_keys($reads), array_keys($writes))) as $t) {
     $r = isset($reads[$t]) ? implode('<br>', array_map(fn($f) => "`$f`", array_keys($reads[$t]))) : '—';
     $w = isset($writes[$t]) ? implode('<br>', array_map(fn($f) => "`$f`", array_keys($writes[$t]))) : '—';
-    $owner = in_array($t, $ownTables, true) ? 'this module' : ($t === 'information_schema' ? 'the database server (column lookups)' : 'OpenEMR core');
+    $owner = in_array($t, $ownTables, true) ? 'this module' : ($t === 'information_schema' ? 'the database server (column lookups)' : (otherModule($t) ?? 'OpenEMR core'));
     $md[] = "| `$t` | $r | $w | $owner |";
 }
 $md[] = '';
@@ -719,9 +740,11 @@ $writerFunctions = ['setUserSetting' => 'user_settings', 'sqlInsert' => 'a core 
 $viaFunctions = array_intersect_key($writerFunctions, $coreFunctions);
 $md[] = ($writes === []
     ? '**It writes nothing in its own SQL: every statement above reads.**'
-    : ($coreWrites === []
+    : ($coreWrites === [] && $moduleWrites === []
     ? '**In its own SQL it writes only to its own tables.**'
-    : '**In its own SQL it writes to OpenEMR core tables:** ' . implode(', ', array_map(fn($t) => "`$t`", $coreWrites)) . '.'))
+    : ($coreWrites === [] ? '**In its own SQL it writes to no OpenEMR core table.**'
+    : '**In its own SQL it writes to OpenEMR core tables:** ' . implode(', ', array_map(fn($t) => "`$t`", $coreWrites)) . '.')
+    . ($moduleWrites === [] ? '' : ' **It writes to another openhealthcare module\'s tables:** ' . implode(', ', array_map(fn($t) => "`$t`", $moduleWrites)) . '.')))
     . ($viaFunctions === [] ? '' : ' Through OpenEMR functions it also writes ' . implode(', ', array_map(fn($f, $t) => "`$t` (`$f()`)", array_keys($viaFunctions), $viaFunctions)) . '.')
     . ($classWriteLines === [] ? '' : ' Through OpenEMR\'s own classes it writes ' . implode('; ', $classWriteLines) . '.');
 $md[] = '';

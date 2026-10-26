@@ -1,6 +1,6 @@
 {
     "name": "anun333/openhealthcare-common",
-    "description": "Code shared by the openhealthcare OpenEMR modules: one compatibility layer for OpenEMR 7.0 to 8.5, a check that translated strings carry no apostrophes or quote marks, and the tool that writes each module's FOOTPRINT.md.",
+    "description": "Code shared by the openhealthcare OpenEMR modules: one compatibility layer for OpenEMR 7.0 to 8.5, checks on translated strings and on the labels a guide quotes, the questionnaire runtime's version and which responses count, and the tool that writes each module's FOOTPRINT.md.",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "keywords": ["openemr", "openemr-module"],

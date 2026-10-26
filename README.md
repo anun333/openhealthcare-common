@@ -28,6 +28,18 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
   self::assertSame([], $result['found']);
   ```
 
+- **`OpenHealthcare\Common\GuideLabels::check($moduleDir)`:** every label the module's GUIDE.md quotes in bold (menu entries, tabs, buttons, headings) must be a string the module translates, so a renamed button fails the module's test instead of leaving the guide pointing at nothing. A label that comes from data rather than an `xl()` call is named with its file in composer.json, under `extra.openhealthcare.guide-labels-elsewhere` (`{"Housing Status (UDS)": "sql/install.sql"}`), and the file must still contain it. A module's test:
+
+  ```php
+  $result = GuideLabels::check(dirname(__DIR__));
+  self::assertGreaterThan(20, $result['labels'], 'the guide quotes its labels');
+  self::assertSame([], $result['missing']);
+  ```
+
+- **`OpenHealthcare\Common\QuestionnaireRuntime::version()`** and **`atLeast($version)`:** the version of OpenEMR's own questionnaire runtime, read from the file the site serves. OpenEMR's release number doesn't say: 8.5.0 shipped runtime 0.2.0 and gained 0.4.0 in a backport. `QuestionnaireRuntime::COMPLETES` (0.4.0) is the first with `enableWhenExpression`, repeats per instance and responses saved as completed.
+
+- **`OpenHealthcare\Common\QuestionnaireStatus`:** which saved questionnaire responses count as answered. Runtime 0.4.0 saves a submitted response as completed (amended when edited after); every earlier one saved everything in-progress. Until a site's first completed or amended response, every response counts; after it, a response saved earlier counts whatever its status, and a later one only when completed or amended; entered-in-error never counts. `condition('qr')` gives the SQL and its binds, `counts($status, $createTime, $since)` the same rule for a row already read.
+
 ## What isn't, on purpose
 
 - **A guard for command-line tools.** A module installed by Composer has no `vendor/` of its own, so a tool can't load this package before it refuses a web request. Each tool starts with these lines instead:
@@ -82,6 +94,8 @@ The module's `tools/footprint.php` only loads `vendor/anun333/openhealthcare-com
     }
 }
 ```
+
+A table another openhealthcare module created is named by its module in the sheet's owner column (1.3.0), not as OpenEMR's, and a write to one is said apart from writes to core tables.
 
 A change to the tool's output changes every module's sheet, so a release that changes it regenerates them all in the same pass.
 

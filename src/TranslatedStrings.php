@@ -32,9 +32,27 @@ final class TranslatedStrings
      */
     public static function scan(string $root, array $dirs = ['src', 'public', 'templates']): array
     {
-        $root = rtrim($root, '/');
-        $checked = 0;
+        $literals = self::literals($root, $dirs);
         $found = [];
+        foreach ($literals as $literal) {
+            if (str_contains($literal['text'], "'") || str_contains($literal['text'], '"')) {
+                $found[] = $literal['path'] . ': ' . $literal['text'];
+            }
+        }
+        return ['checked' => count($literals), 'found' => $found];
+    }
+
+    /**
+     * Every string literal the module passes to xl(), xlt(), xla(), xlj() or xlx(), in file order.
+     *
+     * @param string       $root the module's directory
+     * @param list<string> $dirs the folders under it to read, PHP and Twig files only
+     * @return list<array{path: string, text: string}> path relative to $root
+     */
+    public static function literals(string $root, array $dirs = ['src', 'public', 'templates']): array
+    {
+        $root = rtrim($root, '/');
+        $literals = [];
         foreach ($dirs as $dir) {
             if (!is_dir("$root/$dir")) {
                 continue;
@@ -50,14 +68,10 @@ final class TranslatedStrings
             foreach ($paths as $path) {
                 preg_match_all(self::CALL, (string)file_get_contents($path), $m);
                 foreach ($m[1] as $literal) {
-                    $checked++;
-                    $text = stripcslashes(substr($literal, 1, -1));
-                    if (str_contains($text, "'") || str_contains($text, '"')) {
-                        $found[] = substr($path, strlen($root) + 1) . ': ' . $text;
-                    }
+                    $literals[] = ['path' => substr($path, strlen($root) + 1), 'text' => stripcslashes(substr($literal, 1, -1))];
                 }
             }
         }
-        return ['checked' => $checked, 'found' => $found];
+        return $literals;
     }
 }
