@@ -5,6 +5,9 @@
  * headings. This checks each one is a string the module translates, so a renamed button fails the
  * module's test instead of leaving the guide pointing at something that isn't there.
  *
+ * A label passed to Twig's translation filters (`{{ 'Assign'|xlt }}`) counts as translated from 1.4.0;
+ * before, a dashboard card's button had to be named below as coming from its template.
+ *
  * A label that comes from the module's data rather than an xl() call (a list of priorities in a
  * JSON file, say) is named in the module's composer.json, under
  * `extra.openhealthcare.guide-labels-elsewhere`, with the file it comes from:
@@ -48,7 +51,7 @@ final class GuideLabels
         $labels = array_values(array_unique(array_filter(array_map(self::normal(...), $m[1]), fn(string $label): bool => $label !== '')));
 
         $strings = [];
-        foreach (TranslatedStrings::literals($root, $dirs) as $literal) {
+        foreach ([...TranslatedStrings::literals($root, $dirs), ...TranslatedStrings::twigFilterLiterals($root, $dirs)] as $literal) {
             $strings[self::normal($literal['text'])] = true;
         }
         $elsewhere = self::elsewhere($root);

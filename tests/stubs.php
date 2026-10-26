@@ -18,6 +18,10 @@ namespace OpenEMR\Common\Database {
             /** @var list<array<string, mixed>> */
             public static array $rows = [];
             public static string $lastSql = '';
+            /** @var array<mixed> */
+            public static array $lastBinds = [];
+            /** A test sets this to make the query fail, as a site without the table would. */
+            public static ?\Throwable $throw = null;
 
             /**
              * @param array<mixed> $binds
@@ -26,6 +30,10 @@ namespace OpenEMR\Common\Database {
             public static function fetchRecords(string $sql, array $binds = []): array
             {
                 self::$lastSql = $sql;
+                self::$lastBinds = $binds;
+                if (self::$throw !== null) {
+                    throw self::$throw;
+                }
                 return self::$rows;
             }
         }

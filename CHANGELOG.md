@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0 (2026-10-26)
+
+- **`OpenEmr::pageLang()` and `OpenEmr::pageDir()`** (and `PageLanguage`, which they use): the page's language as a BCP 47 tag and its direction (`ltr` or `rtl`), from the signed-in user's OpenEMR language (`language_choice` in the session, then `lang_languages`). Every module page so far says `<html lang="en">`, so on a Spanish OpenEMR a screen reader read the translated page with English pronunciation (WCAG 2.1 SC 3.1.1; found by the modules' second review pass). OpenEMR's shipped codes that aren't tags are mapped (`se` → `sv`, `el` → `es-419`, `zt` → `zh-Hant`, `pa` → `pt-AO`, `dd` → `en` and nine more), but only when the row's description is the one OpenEMR ships with the code, so a site's own `el` row for Greek stays `el`. Without a session (a command-line tool), a matching row or the table, it's `en` and `ltr`.
+- **Twig translation filters:** `TranslatedStrings::twigFilterLiterals()` lists the strings a Twig template passes to OpenEMR's `xl`, `xlt`, `xla` and `xlj` filters (`{{ 'Assign'|xlt }}`); `GuideLabels::check()` counts them as translated, so a dashboard card's button no longer has to be named under `guide-labels-elsewhere`; and `scan(..., twigFilters: true)` checks them for apostrophes. `scan()` without it reads what it did before.
+- **Fixed: a single-quoted PHP string kept its backslashes.** `TranslatedStrings` unescaped every literal like a double-quoted one, so `xlt('Line\n')` read as a line break and `xlt('Say \"yes\"')` as `Say "yes"`; in single quotes PHP unescapes only `\'` and `\\`. No module's label was affected.
+- **Numbering:** PHP 8.3 as the floor moves to 1.5.0 (2027-01-01) and the shared contract types to 1.6.0.
+
 ## 1.3.3 (2026-10-25)
 
 - **Fixed: on a site whose questionnaire runtime is older than 0.4.0, one completed response stopped every later response counting.** `QuestionnaireStatus` (1.3.0) took the site's first completed or amended response as the moment its runtime started recording finished ones. But an older runtime saves every response in-progress, finished or not, and a FHIR API client (the SMART questionnaire app, say) can write a completed one on 8.4.1: from then on, the runtime's own finished responses dropped out. The rule now applies only where the site's runtime is 0.4.0 or later (`QuestionnaireStatus::applies()`); elsewhere every response but entered-in-error counts, as before 1.3.0. Found by the Staff Worklist's end-to-end check on 8.4.1, whose one response saved through core as completed hid its other test responses.

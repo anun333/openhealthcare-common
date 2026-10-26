@@ -14,6 +14,7 @@
  *   CSRF tokens             CsrfUtils with a session argument    or without one (7.0)
  *   access denied           AccessDeniedHelper (8.1+)            or a plain 403 page
  *   the audit log           EventAuditLogger::getInstance()      or ::instance() (7.0's Singleton trait)
+ *   the page's language     the session's language_choice, through lang_languages (PageLanguage)
  *
  * Measured against the v7_0_3 and v8_0_0 tags and the official 7.0.2, 7.0.3 and 8.x images
  * (2026-10-16 and 2026-10-22). Corrected 2026-10-25 (1.3.1): 7.0.4 and 8.0.0 to 8.0.0.3 have the
@@ -196,6 +197,21 @@ final class OpenEmr
         echo '<!DOCTYPE html><html><head><title>' . htmlspecialchars($title, ENT_QUOTES) . '</title></head><body><h1>'
             . htmlspecialchars(xl('Not authorized'), ENT_QUOTES) . '</h1></body></html>';
         exit;
+    }
+
+    /**
+     * The page's language as a BCP 47 tag, for `<html lang="...">`: the signed-in user's OpenEMR
+     * language, `en` without one. See PageLanguage.
+     */
+    public static function pageLang(): string
+    {
+        return PageLanguage::code();
+    }
+
+    /** The page's direction for `<html dir="...">`: `rtl` for a right-to-left language, else `ltr`. */
+    public static function pageDir(): string
+    {
+        return PageLanguage::dir();
     }
 
     public static function isAdministrator(): bool

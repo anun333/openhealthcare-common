@@ -57,6 +57,19 @@ final class GuideLabelsTest extends TestCase
         $this->assertSame(["High (named as coming from data/priorities.json, which doesn't contain it)"], $stale['missing']);
     }
 
+    public function testALabelInATwigFilterCountsAndAnUntranslatedOneDoesNot(): void
+    {
+        $dir = self::module("On the dashboard card, press **Open the worklist** or **Not translated**.\n", "<?php echo xlt('Worklist');\n");
+        mkdir("$dir/templates");
+        file_put_contents(
+            "$dir/templates/card.html.twig",
+            "<a>{{ 'Open the worklist'|xlt }}</a>\n<p>{{ \"Not translated\" }}</p>\n<p>{{ 'Not translated'|xlListLabel }}</p>\n"
+        );
+        $result = GuideLabels::check($dir);
+        $this->assertSame(['Not translated'], $result['missing'], 'a Twig xlt filter counts; no filter, or a longer filter name, does not');
+        $this->assertSame(2, $result['strings']);
+    }
+
     public function testNoGuideIsAnError(): void
     {
         $dir = self::module('x', '<?php');

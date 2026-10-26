@@ -9,6 +9,11 @@
  * A module's test asserts a floor on `checked` as well as an empty `found`, so a scan that read
  * no files (a wrong root) fails instead of passing on nothing.
  *
+ * Twig templates translate with filters as well (`'Assign'|xlt`, OpenEMR's xl, xlt, xla and xlj);
+ * twigFilterLiterals() reads those, GuideLabels counts them, and scan() checks them when asked
+ * (1.4.0). A single-quoted PHP literal keeps its backslashes but for `\'` and `\\`, as PHP does;
+ * 1.0.0 to 1.3.3 unescaped it like a double-quoted one, so `'\n'` read as a new line.
+ *
  * @package   OpenHealthcare\Common
  * @link      https://github.com/anun333/openhealthcare-common
  * @author    anun333 <anun333@posteo.net>
@@ -25,14 +30,21 @@ final class TranslatedStrings
     /** xl(), xlt(), xla(), xlj() and xlx() with a single- or double-quoted literal. */
     private const CALL = "/\\bxl[tajx]?\\(\\s*('(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\")/";
 
+    /** A string literal passed to Twig's xl, xlt, xla or xlj filter, and not to a longer filter name (xlListLabel). */
+    private const TWIG_FILTER = "/('(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\")\\s*\\|\\s*xl[taj]?(?![A-Za-z0-9_])/";
+
     /**
-     * @param string       $root the module's directory
-     * @param list<string> $dirs the folders under it to read, PHP and Twig files only
+     * @param string       $root        the module's directory
+     * @param list<string> $dirs        the folders under it to read, PHP and Twig files only
+     * @param bool         $twigFilters also check strings passed to Twig's translation filters (1.4.0)
      * @return array{checked: int, found: list<string>} found: "path: text" for each string with an apostrophe or quote mark
      */
-    public static function scan(string $root, array $dirs = ['src', 'public', 'templates']): array
+    public static function scan(string $root, array $dirs = ['src', 'public', 'templates'], bool $twigFilters = false): array
     {
         $literals = self::literals($root, $dirs);
+        if ($twigFilters) {
+            $literals = [...$literals, ...self::twigFilterLiterals($root, $dirs)];
+        }
         $found = [];
         foreach ($literals as $literal) {
             if (str_contains($literal['text'], "'") || str_contains($literal['text'], '"')) {
@@ -51,27 +63,63 @@ final class TranslatedStrings
      */
     public static function literals(string $root, array $dirs = ['src', 'public', 'templates']): array
     {
+        return self::find($root, $dirs, '/\.(php|twig)$/', self::CALL);
+    }
+
+    /**
+     * Every string literal a Twig template passes to OpenEMR's xl, xlt, xla or xlj filter
+     * (`'Assign'|xlt`), in file order (1.4.0).
+     *
+     * @param string       $root the module's directory
+     * @param list<string> $dirs the folders under it to read; Twig files only
+     * @return list<array{path: string, text: string}> path relative to $root
+     */
+    public static function twigFilterLiterals(string $root, array $dirs = ['src', 'public', 'templates']): array
+    {
+        return self::find($root, $dirs, '/\.twig$/', self::TWIG_FILTER);
+    }
+
+    /**
+     * @param list<string> $dirs
+     * @return list<array{path: string, text: string}>
+     */
+    private static function find(string $root, array $dirs, string $files, string $pattern): array
+    {
         $root = rtrim($root, '/');
         $literals = [];
         foreach ($dirs as $dir) {
             if (!is_dir("$root/$dir")) {
                 continue;
             }
-            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$root/$dir", \FilesystemIterator::SKIP_DOTS));
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("$root/$dir", \FilesystemIterator::SKIP_DOTS));
             $paths = [];
-            foreach ($files as $file) {
-                if ($file instanceof \SplFileInfo && preg_match('/\.(php|twig)$/', $file->getFilename())) {
+            foreach ($iterator as $file) {
+                if ($file instanceof \SplFileInfo && preg_match($files, $file->getFilename())) {
                     $paths[] = $file->getPathname();
                 }
             }
             sort($paths);
             foreach ($paths as $path) {
-                preg_match_all(self::CALL, (string)file_get_contents($path), $m);
+                preg_match_all($pattern, (string)file_get_contents($path), $m);
                 foreach ($m[1] as $literal) {
-                    $literals[] = ['path' => substr($path, strlen($root) + 1), 'text' => stripcslashes(substr($literal, 1, -1))];
+                    $literals[] = ['path' => substr($path, strlen($root) + 1), 'text' => self::unescape($literal, str_ends_with($path, '.php'))];
                 }
             }
         }
         return $literals;
+    }
+
+    /**
+     * A literal's text, quotes removed. A single-quoted PHP string unescapes only `\'` and `\\`;
+     * a double-quoted one, and any Twig string (Twig's lexer uses stripcslashes for both quotes),
+     * unescapes C-style.
+     */
+    private static function unescape(string $literal, bool $php): string
+    {
+        $text = substr($literal, 1, -1);
+        if ($php && $literal[0] === "'") {
+            return strtr($text, ['\\\\' => '\\', "\\'" => "'"]);
+        }
+        return stripcslashes($text);
     }
 }

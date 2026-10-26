@@ -17,10 +17,17 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
   | `deny()` | `AccessDeniedHelper` (8.1 on) | a plain 403 page |
   | `audit()` | `EventAuditLogger::getInstance()` | `::instance()` |
   | `isAdministrator()` | `AclMain::aclCheckCore('admin', 'super')` | the same |
+  | `pageLang()`, `pageDir()` (1.4.0) | the session's `language_choice`, through `lang_languages` | the same, from `$_SESSION` |
+
+- **`OpenEmr::pageLang()` and `pageDir()`** (1.4.0, through `OpenHealthcare\Common\PageLanguage`): the page's language as a BCP 47 tag, and its direction, from the signed-in user's OpenEMR language, so a screen reader reads a translated page in that language (WCAG 2.1 SC 3.1.1). OpenEMR's own language codes aren't all tags (`se` is Swedish, `el` Latin American Spanish, `zt` Traditional Chinese), so they're mapped: `sv`, `es-419`, `zh-Hant`. Without a session, from the command line or without a matching row it's `en` and `ltr`. In a page:
+
+  ```php
+  <html lang="<?php echo attr(OpenEmr::pageLang()); ?>" dir="<?php echo attr(OpenEmr::pageDir()); ?>">
+  ```
 
 - **The footprint tool** (`tools/footprint.php`, `vendor/bin/footprint`): writes each module's FOOTPRINT.md from its source. See [The footprint tool](#the-footprint-tool).
 
-- **`OpenHealthcare\Common\TranslatedStrings::scan($moduleDir)`:** every string a module passes to `xl()`, `xlt()`, `xla()`, `xlj()` or `xlx()` that has an apostrophe or quote mark, which OpenEMR shows as a backtick. A module's test:
+- **`OpenHealthcare\Common\TranslatedStrings::scan($moduleDir)`:** every string a module passes to `xl()`, `xlt()`, `xla()`, `xlj()` or `xlx()` that has an apostrophe or quote mark, which OpenEMR shows as a backtick. `scan($moduleDir, twigFilters: true)` (1.4.0) also checks strings passed to Twig's `xl`, `xlt`, `xla` and `xlj` filters (`{{ 'Assign'|xlt }}`), which `twigFilterLiterals()` lists. A module's test:
 
   ```php
   $result = TranslatedStrings::scan(dirname(__DIR__));
@@ -28,7 +35,7 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
   self::assertSame([], $result['found']);
   ```
 
-- **`OpenHealthcare\Common\GuideLabels::check($moduleDir)`:** every label the module's GUIDE.md quotes in bold (menu entries, tabs, buttons, headings) must be a string the module translates, so a renamed button fails the module's test instead of leaving the guide pointing at nothing. A label that comes from data rather than an `xl()` call is named with its file in composer.json, under `extra.openhealthcare.guide-labels-elsewhere` (`{"Housing Status (UDS)": "sql/install.sql"}`), and the file must still contain it. A module's test:
+- **`OpenHealthcare\Common\GuideLabels::check($moduleDir)`:** every label the module's GUIDE.md quotes in bold (menu entries, tabs, buttons, headings) must be a string the module translates, so a renamed button fails the module's test instead of leaving the guide pointing at nothing. A label translated by a Twig filter counts too (1.4.0), so a dashboard card's button needs no entry below. A label that comes from data rather than an `xl()` call is named with its file in composer.json, under `extra.openhealthcare.guide-labels-elsewhere` (`{"Housing Status (UDS)": "sql/install.sql"}`), and the file must still contain it. A module's test:
 
   ```php
   $result = GuideLabels::check(dirname(__DIR__));
@@ -123,6 +130,7 @@ Every module installs into OpenEMR's one `vendor/` folder, so two modules needin
 
 - **1.x only adds.** A 1.x release never removes or changes what a module already uses. Modules require `^1.0`.
 - **A breaking change is 2.0.0,** and the modules move to it together.
+- **Planned:** PHP 8.3 as the floor in **1.5.0** (2027-01-01, with a guarded patient-id accessor), and the shared contract types in **1.6.0**. Both were numbered one lower until 1.4.0 took the page language.
 
 ## Install
 
