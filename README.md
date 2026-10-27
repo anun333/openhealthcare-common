@@ -99,7 +99,7 @@ Before 1.5.0 a module adding a Worklist tab built it from the Worklist's own cla
 | | Worklist 0.8.0 to 0.8.7 | Worklist 0.9.0 and later |
 |---|---|---|
 | **A tab on the Worklist's own types** (`addSource()`), as Care Management 0.3.x | works, as before | works: `addSource()` stays |
-| **A tab on the contract** (`Worklist::contribute()`), as Behavioral Health 0.2.6, CCBHC Report 0.1.6 and Revenue Cycle 0.1.7 | works: `contribute()` wraps the source in the Worklist's own types for `addSource()` | works: the event's own `contribute()` takes it |
+| **A tab on the contract** (`Worklist::contribute()`), as Behavioral Health 0.2.6, CCBHC Report 0.1.7 and Revenue Cycle 0.1.7 | works: `contribute()` wraps the source in the Worklist's own types for `addSource()` | works: the event's own `contribute()` takes it |
 
 A contributor's listener:
 
