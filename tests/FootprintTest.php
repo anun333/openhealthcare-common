@@ -59,6 +59,41 @@ final class FootprintTest extends TestCase
         }
     }
 
+    public function testAnIndexOnACoreTableIsAnIndexNotAColumn(): void
+    {
+        file_put_contents($this->module . '/sql/install.sql', "\n#IfNotIndex form_questionnaire_assessments response_id\n"
+            . "ALTER TABLE `form_questionnaire_assessments` ADD INDEX `response_id` (`response_id`(64));\n#EndIf\n", FILE_APPEND);
+        [$code, $out] = $this->footprint();
+        self::assertSame(0, $code, $out);
+        $sheet = (string)file_get_contents($this->module . '/FOOTPRINT.md');
+        self::assertStringContainsString("- **Core schema change — adds an index to OpenEMR's `form_questionnaire_assessments` table:** `response_id` (response_id(64)).", $sheet);
+        self::assertStringNotContainsString('`INDEX`', $sheet);
+        self::assertStringContainsString('- **Tables it creates and owns:** `sample_thing`.', $sheet);
+    }
+
+    public function testAnInstallThatOnlyAddsIndexesIsDescribed(): void
+    {
+        file_put_contents($this->module . '/sql/install.sql', "#IfNotIndex questionnaire_response patient_id\n"
+            . "ALTER TABLE `questionnaire_response` ADD INDEX `patient_id` (`patient_id`);\n#EndIf\n");
+        [$code, $out] = $this->footprint();
+        self::assertSame(0, $code, $out);
+        $sheet = (string)file_get_contents($this->module . '/FOOTPRINT.md');
+        foreach ([
+            "- **Core schema change — adds an index to OpenEMR's `questionnaire_response` table:** `patient_id` (patient_id).",
+            '- **Tables it creates and owns:** none.',
+            'leaves the indexes above in place.',
+        ] as $line) {
+            self::assertStringContainsString($line, $sheet);
+        }
+    }
+
+    public function testAnInstallSqlWithNothingInItIsRefused(): void
+    {
+        file_put_contents($this->module . '/sql/install.sql', "-- nothing yet\n#IfNotTable sample_never\n#EndIf\n");
+        [$code, $out] = $this->footprint();
+        self::assertNotSame(0, $code);
+    }
+
     public function testCheckPassesUntilTheModuleChanges(): void
     {
         $this->footprint();

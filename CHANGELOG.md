@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.1 (2026-10-27)
+
+- **The footprint tool reads an index as an index.** `ALTER TABLE … ADD INDEX` (or `KEY`, `UNIQUE`) in a module's `install.sql` was read as a column named `INDEX`; it's now listed as an index on that table, with what it covers. An `install.sql` that only adds indexes (Clinic Forms 0.44.1's) is described instead of refused, and its sheet says the indexes stay when the module is removed. Only the tool changed: the library's classes are the same as 1.5.0's (`tools/api-signature.php`: 0 breaks).
+- **Sheets that change:** those of the modules that add the shared `response_id` index (UDS Report, Title X Report, CCBHC Report, Staff Worklist), whose index line read as a column, and Clinic Forms'. Each regenerates when the module takes 1.5.1.
+- **Checked:** 88 tests (3 new); against 1.5.0's tool two of them fail.
+
 ## 1.5.0 (2026-10-26)
 
 - **The shared contracts** (`OpenHealthcare\Common\Contract\…`), so one module hands another a tab, a figure or a filled table without loading its classes or reading its tables. README › Contracts between modules has the plan.

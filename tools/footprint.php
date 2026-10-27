@@ -350,12 +350,16 @@ function otherModule(string $table): ?string
 
 $ownTables = [];
 $alters = [];
+$indexes = [];
 $inserts = [];
 $updates = [];
 $id = '`?([A-Za-z_][A-Za-z0-9_]*)`?';
 foreach ($statements as $st) {
     if (preg_match('/^CREATE TABLE\s+(?:IF NOT EXISTS\s+)?' . $id . '/i', $st, $m)) {
         $ownTables[] = $m[1];
+    } elseif (preg_match('/^ALTER TABLE\s+' . $id . '\s+ADD\s+(UNIQUE\s+)?(?:INDEX|KEY)\s+' . $id . '\s*\(([^;]*)\)\s*;?$/i', $st, $m)) {
+        // An index on a table (a core one, usually), not a column: the name and what it covers.
+        $indexes[$m[1]][] = ['name' => $m[3], 'columns' => trim(str_replace('`', '', $m[4])), 'unique' => trim($m[2]) !== ''];
     } elseif (preg_match('/^ALTER TABLE\s+' . $id . '\s+ADD\s+(?:COLUMN\s+)?' . $id . '\s+([^\n,]+)/i', $st, $m)) {
         $alters[$m[1]][] = ['column' => $m[2], 'type' => trim($m[3])];
     } elseif (preg_match('/^INSERT INTO\s+' . $id . '/i', $st, $m)) {
@@ -383,13 +387,14 @@ foreach ($updates as $table => $wheres) {
         }
     }
 }
-if ($hasInstall && $ownTables === []) {
-    fail('no CREATE TABLE found in sql/install.sql');
+if ($hasInstall && $ownTables === [] && $alters === [] && $indexes === [] && $inserts === [] && $updates === []) {
+    fail('nothing found in sql/install.sql: no table, column, index or row');
 }
 if (!$hasInstall && is_dir($root . '/sql')) {
     fail('sql/ exists but has no install.sql; the sheet would say the module changes no table');
 }
 $coreAlters = array_diff_key($alters, array_flip($ownTables));
+$coreIndexes = array_diff_key($indexes, array_flip($ownTables));
 $installWrites = array_values(array_diff(array_keys($inserts), $ownTables));
 $newLists = [];
 $listRows = 0;
@@ -681,14 +686,17 @@ if (!$hasInstall) {
         ? 'Each sits inside an `#If…` guard (' . implode(', ', array_map(fn($x) => "`#$x`", $guards)) . '), so re-running the install changes nothing.'
         : '**Not guarded, so a re-run would repeat them:** statements starting on line ' . implode(', ', $unguarded) . '.');
     $md[] = '';
-    if ($coreAlters === []) {
+    if ($coreAlters === [] && $coreIndexes === []) {
         $md[] = '- **Core schema changes:** none.';
     } else {
         foreach ($coreAlters as $t => $cols) {
             $md[] = "- **Core schema change — adds " . count($cols) . " columns to OpenEMR's `$t` table:** " . implode(', ', array_map(fn($c) => "`{$c['column']}` ({$c['type']})", $cols)) . '.';
         }
+        foreach ($coreIndexes as $t => $ixs) {
+            $md[] = "- **Core schema change — adds " . (count($ixs) === 1 ? 'an index' : count($ixs) . ' indexes') . " to OpenEMR's `$t` table:** " . implode(', ', array_map(fn($x) => "`{$x['name']}` (" . ($x['unique'] ? 'unique, ' : '') . "{$x['columns']})", $ixs)) . '. No data changes; the guard skips it when an index of that name is already there.';
+        }
     }
-    $md[] = '- **Tables it creates and owns:** ' . implode(', ', array_map(fn($t) => "`$t`", $ownTables)) . '.';
+    $md[] = '- **Tables it creates and owns:** ' . ($ownTables === [] ? 'none' : implode(', ', array_map(fn($t) => "`$t`", $ownTables))) . '.';
     if ($installWrites === []) {
         $md[] = '- **Rows added to core tables:** none.';
     } else {
@@ -712,7 +720,7 @@ if (!$hasInstall) {
     }
     $md[] = '';
     $md[] = $uninstall === []
-        ? '- **No uninstall script** (`sql/` holds only ' . implode(', ', array_map(fn($f) => "`$f`", $sqlFiles)) . '): disabling or removing the module leaves the tables and rows above in place, along with anything staff recorded in them.'
+        ? '- **No uninstall script** (`sql/` holds only ' . implode(', ', array_map(fn($f) => "`$f`", $sqlFiles)) . '): disabling or removing the module leaves ' . ($ownTables === [] && $installWrites === [] && $coreAlters === [] ? 'the indexes above in place.' : 'the tables and rows above in place, along with anything staff recorded in them.')
         : '- **Uninstall script:** ' . implode(', ', array_map(fn($f) => "`$f`", $uninstall)) . '.';
     $md[] = '';
 }
