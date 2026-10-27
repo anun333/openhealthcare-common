@@ -47,6 +47,11 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
 
 - **`OpenHealthcare\Common\QuestionnaireStatus`:** which saved questionnaire responses count as answered. Runtime 0.4.0 saves a submitted response as completed (amended when edited after); every earlier one saved everything in-progress. Until a site's first completed or amended response, every response counts; after it, a response saved earlier counts whatever its status, and a later one only when completed or amended; entered-in-error never counts. `condition('qr')` gives the SQL and its binds, `counts($status, $createTime, $since)` the same rule for a row already read.
 
+- **The shared contracts** (1.5.0, `OpenHealthcare\Common\Contract\…`): what one module hands another, so neither loads the other's classes or reads its tables. See [Contracts between modules](#contracts-between-modules).
+  - **`Contract\Worklist`:** a tab in the Staff Worklist. `WorkSource` (`id()`, `collect(?int $pid)`), `WorkItem` (the row: title, detail, priority, since, owner, action, site, sensitivity, overdue), `ItemKey` (tab id, patient, a plain positive reference) and `PatientRef` (with `SQL_COLUMNS` and `fromRow()`), and `Worklist::contribute()`, which adds the tab to any Worklist from 0.8.0.
+  - **`Contract\Figures`:** totals one module asks of another for a period. `FiguresRequest::ask($from, $to, $wanted, $facilityId)` sends `openhealthcare.figures.request` and returns `Figure`s by id (`slidingfee.discounts_posted`: label, value, unit `count`, `money` or `percent`, module, note, the page it comes from). Totals only, never a patient.
+  - **`Contract\Forms\DocumentFill`:** Clinic Forms' fill event (`clinic_forms.document.fill`, from Clinic Forms 0.33.0): `asks($event, $document, $table)`, `fill()`, `language()` and `pid()`, for a module that fills a table in one of its documents.
+
 ## What isn't, on purpose
 
 - **A guard for command-line tools.** A module installed by Composer has no `vendor/` of its own, so a tool can't load this package before it refuses a web request. Each tool starts with these lines instead:
@@ -60,7 +65,7 @@ It's a plain Composer library, not an OpenEMR module: there is nothing to enable
   ```
 
 - **A module bootstrap's version guard.** `openemr.bootstrap.php` runs on every request, the login page included, before a module's dependencies are known to be there. A bootstrap that needs `OEGlobalsBag` returns early without it, so on OpenEMR 7.0.3 and older the module stays switched off instead of stopping every page.
-- **The event contracts** (the Staff Worklist's tab, Clinic Forms' fill) stay in their modules for now. Moving them means a class with two names during the change, which needs a plan of its own.
+- **The events themselves.** The Worklist's collect event and Clinic Forms' fill event stay classes of their modules and implement nothing from here, so their pages keep working on a site where an older copy of the library loads first. The contracts read an event by what it has (`method_exists()`, its properties), as the modules already did.
 
 ## Using it in a module
 
@@ -73,6 +78,10 @@ if (is_dir($common)) {
     // A module copied in, with `composer install --no-dev` run in its folder. This leaves OpenEMR's own
     // mapping alone when Composer installed the module there.
     $classLoader->registerNamespaceIfNotExists('OpenHealthcare\\Common\\', $common);
+    // From 1.5.0, a module that uses the contracts also registers them under their own prefix (below).
+    if (is_dir($common . '/Contract')) {
+        $classLoader->registerNamespaceIfNotExists('OpenHealthcare\\Common\\Contract\\', $common . '/Contract');
+    }
 }
 if (!class_exists(\OpenHealthcare\Common\OpenEmr::class)) {
     return; // the module stays switched off rather than stop OpenEMR's pages
@@ -82,6 +91,41 @@ if (!class_exists(\OpenHealthcare\Common\OpenEmr::class)) {
 `dev/new_module.py` in the openhealthcare repository starts a module this way.
 
 Keep permission checks literal in the module's own code, such as `AclMain::aclCheckCore('admin', 'super')` at the top of a page, so a reviewer reads them where the page is. `isAdministrator()` is here for code with no page of its own. A module's `tools/footprint.php` reads the methods of this package that the module calls, as part of the module, and lists their SQL and calls under `vendor/anun333/openhealthcare-common/`.
+
+## Contracts between modules
+
+Before 1.5.0 a module adding a Worklist tab built it from the Worklist's own classes (`OpenHealthcare\StaffWorklist\Source\WorkSourceInterface` and `Model\WorkItem`, `ItemKey`, `PatientRef`), so its source class couldn't even load without the Worklist, and couldn't be tested on its own. The contracts give those types a second name here. **During the change both names work:**
+
+| | Worklist 0.8.0 to 0.8.7 | Worklist 0.9.0 and later |
+|---|---|---|
+| **A tab on the Worklist's own types** (`addSource()`), as Care Management 0.3.x | works, as before | works: `addSource()` stays |
+| **A tab on the contract** (`Worklist::contribute()`), as Behavioral Health 0.2.6, CCBHC Report 0.1.6 and Revenue Cycle 0.1.7 | works: `contribute()` wraps the source in the Worklist's own types for `addSource()` | works: the event's own `contribute()` takes it |
+
+A contributor's listener:
+
+```php
+$dispatcher->addListener(Worklist::COLLECT_SOURCES, function (object $event): void {
+    if (!interface_exists(WorkSource::class) || !AclMain::aclCheckCore('patients', 'med')) {
+        return; // no contract loaded, or a user this module doesn't give the tab
+    }
+    Worklist::contribute($event, new MySource(Worklist::now($event)), xl('My tab'), xl('Clinician'));
+});
+```
+
+`contribute()` returns false and adds nothing when the event can take neither (not the Worklist's, or the Worklist isn't loaded); the Worklist's own refusals (an id that's taken or one of its built-in tabs) still throw. A source class that implements `WorkSource` must not load where the contract is missing, which is why the listener asks `interface_exists()` before it creates one.
+
+**Two copies of the library.** With Composer there's one copy, and a module requiring `^1.5.0` gets one with the contracts. Modules copied in by hand each carry a copy, and the first one registered serves the namespace, so an older copy registered first (a Clinic Forms from before 1.5.0, say) would hide the contracts. So a module that uses them also registers its copy's `Contract` folder under `OpenHealthcare\Common\Contract\` (the bootstrap above): Composer looks under the longer prefix first, and the contracts come from the first copy that has them while everything else still comes from the first copy registered (`tests/Contract/TwoCopiesTest.php`). A copy before 1.5.0 has no `Contract` folder, so it can't take the prefix.
+
+**The steps:**
+
+1. **1.5.0** (2026-10-26): the contract types, `Worklist::contribute()` and its wrapping for older Worklists, figures, and the fill event's description. Nothing changes for a module that doesn't use them.
+2. **Worklist 0.9.0:** the collect event gains `contribute()`; `addSource()` stays. Its own items are still its own `Model` classes inside; only what other modules hand it changed.
+3. **The contributors move**, each in its next release: Behavioral Health, CCBHC Report and Revenue Cycle now; Care Management in its next (its builder has the list of changes); a module built from now on starts on the contract.
+4. **`addSource()` with the Worklist's own types goes** no sooner than Worklist 1.0.0, once every contributor has shipped on the contract, and only with a release note one version ahead. Until then a module that hasn't moved keeps its tab.
+
+**Figures** and **the fill event** have no second name to retire: figures are new, and the fill event stays Clinic Forms' own class, which the contract describes and Clinic Forms' tests hold it to (`tests/Paper/DocumentFillContractTest.php`). A module answering figures checks its own access rule before it answers, as its own page would, and catches its own errors so the asking page still opens. Sliding Fee 0.6.0 answers the first two.
+
+The plan, with what each module changes, is in the openhealthcare repository's `docs/products/shared-contracts-2026-10.md`.
 
 ## The footprint tool
 
@@ -130,7 +174,8 @@ Every module installs into OpenEMR's one `vendor/` folder, so two modules needin
 
 - **1.x only adds.** A 1.x release never removes or changes what a module already uses. Modules require `^1.0`.
 - **A breaking change is 2.0.0,** and the modules move to it together.
-- **Planned:** PHP 8.3 as the floor in **1.5.0** (2027-01-01, with a guarded patient-id accessor), and the shared contract types in **1.6.0**. Both were numbered one lower until 1.4.0 took the page language.
+- **Checked by reflection:** `tools/api-signature.php` reads the public surface, and `ApiAdditivityTest` holds `src` to every released one in `tests/fixtures/api-<version>.json` (a class, constant, method, parameter, property or interface method gone or changed fails). A release adds its own surface file.
+- **Planned:** PHP 8.3 as the floor in **1.6.0** (2027-01-01, with a guarded patient-id accessor). The shared contracts, planned as 1.6.0, came forward to 1.5.0 on 2026-10-26.
 
 ## Install
 
@@ -146,6 +191,8 @@ vendor/bin/phpunit
 ```
 
 The tests run without OpenEMR, so they cover the 7.0 paths. The 8.x paths run in each module's end-to-end checks against OpenEMR 8.4.1 and master.
+
+Releasing: add the new version's public surface, `php tools/api-signature.php > tests/fixtures/api-X.Y.Z.json`, so later releases are checked against it too.
 
 ## License
 

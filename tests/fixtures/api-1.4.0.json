@@ -1,0 +1,467 @@
+{
+    "OpenHealthcare\\Common\\GuideLabels": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "check": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "guide",
+                        "type": "string",
+                        "optional": true,
+                        "default": "'GUIDE.md'",
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\OpenEmr": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "audit": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "comment",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "pid",
+                        "type": "int",
+                        "optional": true,
+                        "default": "0",
+                        "variadic": false
+                    }
+                ]
+            },
+            "csrfToken": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "deny": {
+                "static": true,
+                "return": "never",
+                "params": [
+                    {
+                        "name": "logMessage",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "module",
+                        "type": "string",
+                        "optional": true,
+                        "default": "'openhealthcare module'",
+                        "variadic": false
+                    }
+                ]
+            },
+            "dispatch": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "eventDispatcher": {
+                "static": true,
+                "return": "Symfony\\Component\\EventDispatcher\\EventDispatcherInterface",
+                "params": []
+            },
+            "isAdministrator": {
+                "static": true,
+                "return": "bool",
+                "params": []
+            },
+            "kernel": {
+                "static": true,
+                "return": "?object",
+                "params": []
+            },
+            "pageDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "pageLang": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "projectDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "requireCsrf": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "token",
+                        "type": "mixed",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "session": {
+                "static": true,
+                "return": "mixed",
+                "params": [
+                    {
+                        "name": "key",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "setting": {
+                "static": true,
+                "return": "string",
+                "params": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "siteDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "srcDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "version": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "webRoot": {
+                "static": true,
+                "return": "string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\PageLanguage": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "bcp47": {
+                "static": true,
+                "return": "string",
+                "params": [
+                    {
+                        "name": "code",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "description",
+                        "type": "string",
+                        "optional": true,
+                        "default": "''",
+                        "variadic": false
+                    }
+                ]
+            },
+            "code": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "dir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\QuestionnaireRuntime": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "PATH": "interface/forms/questionnaire_assessments/native/openemr_questionnaire.js",
+            "COMPLETES": "0.4.0"
+        },
+        "methods": {
+            "atLeast": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "minimum",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "projectDir",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "version": {
+                "static": true,
+                "return": "?string",
+                "params": [
+                    {
+                        "name": "projectDir",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\QuestionnaireStatus": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "FINISHED": [
+                "completed",
+                "amended"
+            ]
+        },
+        "methods": {
+            "applies": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "projectDir",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "condition": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "alias",
+                        "type": "string",
+                        "optional": true,
+                        "default": "'questionnaire_response'",
+                        "variadic": false
+                    }
+                ]
+            },
+            "conditionSince": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "alias",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "since",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "counts": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "status",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "createTime",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "since",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "since": {
+                "static": true,
+                "return": "?string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\TranslatedStrings": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "literals": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    }
+                ]
+            },
+            "scan": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    },
+                    {
+                        "name": "twigFilters",
+                        "type": "bool",
+                        "optional": true,
+                        "default": "false",
+                        "variadic": false
+                    }
+                ]
+            },
+            "twigFilterLiterals": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    }
+}

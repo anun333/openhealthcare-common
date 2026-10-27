@@ -1,0 +1,1312 @@
+{
+    "OpenHealthcare\\Common\\Contract\\Figures\\Figure": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "UNIT_COUNT": "count",
+            "UNIT_MONEY": "money",
+            "UNIT_PERCENT": "percent",
+            "UNITS": [
+                "count",
+                "money",
+                "percent"
+            ],
+            "ID_PATTERN": "/^[a-z][a-z0-9]{2,31}\\.[a-z][a-z0-9_]{1,63}$/D"
+        },
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return": "",
+                "params": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "label",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "value",
+                        "type": "int|float",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "unit",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "module",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "note",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    },
+                    {
+                        "name": "url",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": {
+            "id": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "label": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "module": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "note": {
+                "type": "?string",
+                "static": false,
+                "readonly": true
+            },
+            "unit": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "url": {
+                "type": "?string",
+                "static": false,
+                "readonly": true
+            },
+            "value": {
+                "type": "int|float",
+                "static": false,
+                "readonly": true
+            }
+        }
+    },
+    "OpenHealthcare\\Common\\Contract\\Figures\\FiguresRequest": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "EVENT_NAME": "openhealthcare.figures.request"
+        },
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return": "",
+                "params": [
+                    {
+                        "name": "from",
+                        "type": "DateTimeImmutable",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "to",
+                        "type": "DateTimeImmutable",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "wanted",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n)",
+                        "variadic": false
+                    },
+                    {
+                        "name": "facilityId",
+                        "type": "?int",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "answer": {
+                "static": false,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "figure",
+                        "type": "OpenHealthcare\\Common\\Contract\\Figures\\Figure",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "ask": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "from",
+                        "type": "DateTimeImmutable",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "to",
+                        "type": "DateTimeImmutable",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "wanted",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n)",
+                        "variadic": false
+                    },
+                    {
+                        "name": "facilityId",
+                        "type": "?int",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "figures": {
+                "static": false,
+                "return": "array",
+                "params": []
+            },
+            "wants": {
+                "static": false,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": {
+            "facilityId": {
+                "type": "?int",
+                "static": false,
+                "readonly": true
+            },
+            "from": {
+                "type": "DateTimeImmutable",
+                "static": false,
+                "readonly": true
+            },
+            "to": {
+                "type": "DateTimeImmutable",
+                "static": false,
+                "readonly": true
+            },
+            "wanted": {
+                "type": "array",
+                "static": false,
+                "readonly": true
+            }
+        }
+    },
+    "OpenHealthcare\\Common\\Contract\\Forms\\DocumentFill": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "EVENT_NAME": "clinic_forms.document.fill"
+        },
+        "methods": {
+            "asks": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "documentId",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "tableId",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "fill": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "tableId",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "rows",
+                        "type": "array",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "note",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "language": {
+                "static": true,
+                "return": "string",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "pid": {
+                "static": true,
+                "return": "?int",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\Contract\\Worklist\\ItemKey": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "SOURCE_PATTERN": "/^[a-z][a-z0-9]{2,15}$/D",
+            "REF_PATTERN": "/^[1-9]\\d{0,17}$/D"
+        },
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return": "",
+                "params": [
+                    {
+                        "name": "source",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "pid",
+                        "type": "int",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "ref",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "__toString": {
+                "static": false,
+                "return": "string",
+                "params": []
+            }
+        },
+        "properties": {
+            "pid": {
+                "type": "int",
+                "static": false,
+                "readonly": true
+            },
+            "ref": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "source": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            }
+        }
+    },
+    "OpenHealthcare\\Common\\Contract\\Worklist\\PatientRef": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "SQL_COLUMNS": "pd.fname, pd.lname, pd.DOB, pd.pubpid, pd.deceased_date,\n        (pd.allow_patient_portal = 'YES' AND EXISTS (\n            SELECT 1 FROM patient_access_onsite AS pao\n             WHERE pao.pid = pd.pid AND COALESCE(pao.portal_username, '') <> '')) AS portal_access"
+        },
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return": "",
+                "params": [
+                    {
+                        "name": "pid",
+                        "type": "int",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dob",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "pubpid",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "deceased",
+                        "type": "bool",
+                        "optional": true,
+                        "default": "false",
+                        "variadic": false
+                    },
+                    {
+                        "name": "portalAccess",
+                        "type": "bool",
+                        "optional": true,
+                        "default": "false",
+                        "variadic": false
+                    }
+                ]
+            },
+            "fromRow": {
+                "static": true,
+                "return": "OpenHealthcare\\Common\\Contract\\Worklist\\PatientRef",
+                "params": [
+                    {
+                        "name": "pid",
+                        "type": "int",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "row",
+                        "type": "array",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "now",
+                        "type": "?DateTimeImmutable",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "isDeceased": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "deceasedDate",
+                        "type": "mixed",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "now",
+                        "type": "DateTimeImmutable",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": {
+            "deceased": {
+                "type": "bool",
+                "static": false,
+                "readonly": true
+            },
+            "dob": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "name": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "pid": {
+                "type": "int",
+                "static": false,
+                "readonly": true
+            },
+            "portalAccess": {
+                "type": "bool",
+                "static": false,
+                "readonly": true
+            },
+            "pubpid": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            }
+        }
+    },
+    "OpenHealthcare\\Common\\Contract\\Worklist\\WorkItem": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "PRIORITY_CRITICAL": 1,
+            "PRIORITY_HIGH": 2,
+            "PRIORITY_NORMAL": 3,
+            "ACTION_MODES": [
+                "dialog",
+                "window",
+                "chart"
+            ]
+        },
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return": "",
+                "params": [
+                    {
+                        "name": "key",
+                        "type": "OpenHealthcare\\Common\\Contract\\Worklist\\ItemKey",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "patient",
+                        "type": "OpenHealthcare\\Common\\Contract\\Worklist\\PatientRef",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "detail",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "priority",
+                        "type": "int",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "since",
+                        "type": "DateTimeImmutable",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "ownerId",
+                        "type": "?int",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "actionLabel",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "actionUrl",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "actionMode",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dismissible",
+                        "type": "bool",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "siteId",
+                        "type": "?int",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    },
+                    {
+                        "name": "sensitivity",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    },
+                    {
+                        "name": "overdue",
+                        "type": "bool",
+                        "optional": true,
+                        "default": "false",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": {
+            "actionLabel": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "actionMode": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "actionUrl": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "detail": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            },
+            "dismissible": {
+                "type": "bool",
+                "static": false,
+                "readonly": true
+            },
+            "key": {
+                "type": "OpenHealthcare\\Common\\Contract\\Worklist\\ItemKey",
+                "static": false,
+                "readonly": true
+            },
+            "overdue": {
+                "type": "bool",
+                "static": false,
+                "readonly": true
+            },
+            "ownerId": {
+                "type": "?int",
+                "static": false,
+                "readonly": true
+            },
+            "patient": {
+                "type": "OpenHealthcare\\Common\\Contract\\Worklist\\PatientRef",
+                "static": false,
+                "readonly": true
+            },
+            "priority": {
+                "type": "int",
+                "static": false,
+                "readonly": true
+            },
+            "sensitivity": {
+                "type": "?string",
+                "static": false,
+                "readonly": true
+            },
+            "since": {
+                "type": "DateTimeImmutable",
+                "static": false,
+                "readonly": true
+            },
+            "siteId": {
+                "type": "?int",
+                "static": false,
+                "readonly": true
+            },
+            "title": {
+                "type": "string",
+                "static": false,
+                "readonly": true
+            }
+        }
+    },
+    "OpenHealthcare\\Common\\Contract\\Worklist\\WorkSource": {
+        "kind": "interface",
+        "final": false,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "collect": {
+                "static": false,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "pid",
+                        "type": "?int",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "id": {
+                "static": false,
+                "return": "string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\Contract\\Worklist\\Worklist": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "COLLECT_SOURCES": "staff_worklist.collect_sources"
+        },
+        "methods": {
+            "asWorklistSource": {
+                "static": true,
+                "return": "object",
+                "params": [
+                    {
+                        "name": "source",
+                        "type": "OpenHealthcare\\Common\\Contract\\Worklist\\WorkSource",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "contribute": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "source",
+                        "type": "OpenHealthcare\\Common\\Contract\\Worklist\\WorkSource",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "label",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "ownerRole",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "now": {
+                "static": true,
+                "return": "DateTimeImmutable",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "toWorklistItem": {
+                "static": true,
+                "return": "object",
+                "params": [
+                    {
+                        "name": "item",
+                        "type": "OpenHealthcare\\Common\\Contract\\Worklist\\WorkItem",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "worklistTypesLoaded": {
+                "static": true,
+                "return": "bool",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\GuideLabels": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "check": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "guide",
+                        "type": "string",
+                        "optional": true,
+                        "default": "'GUIDE.md'",
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\OpenEmr": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "audit": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "comment",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "pid",
+                        "type": "int",
+                        "optional": true,
+                        "default": "0",
+                        "variadic": false
+                    }
+                ]
+            },
+            "csrfToken": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "deny": {
+                "static": true,
+                "return": "never",
+                "params": [
+                    {
+                        "name": "logMessage",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "title",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "module",
+                        "type": "string",
+                        "optional": true,
+                        "default": "'openhealthcare module'",
+                        "variadic": false
+                    }
+                ]
+            },
+            "dispatch": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "event",
+                        "type": "object",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "eventDispatcher": {
+                "static": true,
+                "return": "Symfony\\Component\\EventDispatcher\\EventDispatcherInterface",
+                "params": []
+            },
+            "isAdministrator": {
+                "static": true,
+                "return": "bool",
+                "params": []
+            },
+            "kernel": {
+                "static": true,
+                "return": "?object",
+                "params": []
+            },
+            "pageDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "pageLang": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "projectDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "requireCsrf": {
+                "static": true,
+                "return": "void",
+                "params": [
+                    {
+                        "name": "token",
+                        "type": "mixed",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "session": {
+                "static": true,
+                "return": "mixed",
+                "params": [
+                    {
+                        "name": "key",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "setting": {
+                "static": true,
+                "return": "string",
+                "params": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "siteDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "srcDir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "version": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "webRoot": {
+                "static": true,
+                "return": "string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\PageLanguage": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "bcp47": {
+                "static": true,
+                "return": "string",
+                "params": [
+                    {
+                        "name": "code",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "description",
+                        "type": "string",
+                        "optional": true,
+                        "default": "''",
+                        "variadic": false
+                    }
+                ]
+            },
+            "code": {
+                "static": true,
+                "return": "string",
+                "params": []
+            },
+            "dir": {
+                "static": true,
+                "return": "string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\QuestionnaireRuntime": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "PATH": "interface/forms/questionnaire_assessments/native/openemr_questionnaire.js",
+            "COMPLETES": "0.4.0"
+        },
+        "methods": {
+            "atLeast": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "minimum",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "projectDir",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "version": {
+                "static": true,
+                "return": "?string",
+                "params": [
+                    {
+                        "name": "projectDir",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\QuestionnaireStatus": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": {
+            "FINISHED": [
+                "completed",
+                "amended"
+            ]
+        },
+        "methods": {
+            "applies": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "projectDir",
+                        "type": "?string",
+                        "optional": true,
+                        "default": "NULL",
+                        "variadic": false
+                    }
+                ]
+            },
+            "condition": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "alias",
+                        "type": "string",
+                        "optional": true,
+                        "default": "'questionnaire_response'",
+                        "variadic": false
+                    }
+                ]
+            },
+            "conditionSince": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "alias",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "since",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "counts": {
+                "static": true,
+                "return": "bool",
+                "params": [
+                    {
+                        "name": "status",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "createTime",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "since",
+                        "type": "?string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    }
+                ]
+            },
+            "since": {
+                "static": true,
+                "return": "?string",
+                "params": []
+            }
+        },
+        "properties": []
+    },
+    "OpenHealthcare\\Common\\TranslatedStrings": {
+        "kind": "class",
+        "final": true,
+        "abstract": false,
+        "constants": [],
+        "methods": {
+            "literals": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    }
+                ]
+            },
+            "scan": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    },
+                    {
+                        "name": "twigFilters",
+                        "type": "bool",
+                        "optional": true,
+                        "default": "false",
+                        "variadic": false
+                    }
+                ]
+            },
+            "twigFilterLiterals": {
+                "static": true,
+                "return": "array",
+                "params": [
+                    {
+                        "name": "root",
+                        "type": "string",
+                        "optional": false,
+                        "default": null,
+                        "variadic": false
+                    },
+                    {
+                        "name": "dirs",
+                        "type": "array",
+                        "optional": true,
+                        "default": "array (\n  0 => 'src',\n  1 => 'public',\n  2 => 'templates',\n)",
+                        "variadic": false
+                    }
+                ]
+            }
+        },
+        "properties": []
+    }
+}
