@@ -181,6 +181,8 @@ Every module installs into OpenEMR's one `vendor/` folder, so two modules needin
 
 Modules require it in their `composer.json`, and `composer require anun333/oe-module-…` from the OpenEMR directory brings it along. A module copied into `custom_modules` without Composer needs this package too. Each module's README says how, once it uses the package.
 
+**After adding, upgrading or removing a module copied in by hand, restart the container (or Apache).** OpenEMR's Docker images build Composer's autoloader with an APCu cache, which keeps each class's file, and each class it didn't find, across requests. So the copy of this package that serves a class is settled by the first request after a restart, a class once not found stays not found until the cache is cleared, and removing the folder a cached class came from stops the pages that use it. Seen on the 8.4.1 image, 2026-10-26; an OpenEMR built from source without `--apcu-autoloader` has no such cache.
+
 PHP 8.2 or later; OpenEMR's own classes come from the OpenEMR it runs in. Whatever the version, run a PHP with the fix for php2shell (2026-10-21: 8.2.35, 8.3.36, 8.4.27, 8.5.12 or later); the modules' READMEs say why the official OpenEMR 7.0.x images can't get it.
 
 ## Development
